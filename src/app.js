@@ -34,11 +34,11 @@ app.get("/tweets", (req, res) =>{
     let ultimosTweets = tweets.slice(-10);
     ultimosTweets = ultimosTweets.reverse();
     const tweetsResposta = [];
-    ultimosTweets.forEach(tweet => {
-        const avatar = usuarios.find(user => user.username === tweet.username).avatar;
-        const username = tweet.username;
-        const tweetRes = tweet.tweet;
-        const resposta = {username, avatar, tweetRes};
+    ultimosTweets.forEach(t => {
+        const avatar = usuarios.find(user => user.username === t.username).avatar;
+        const username = t.username;
+        const tweet = t.tweet;
+        const resposta = {username, avatar, tweet};
         tweetsResposta.push(resposta);
     })
 
