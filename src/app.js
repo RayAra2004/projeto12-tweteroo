@@ -12,29 +12,76 @@ app.post("/sign-up", (req, res) =>{
     const {username, avatar} = req.body;
     const novoUsuario = {username, avatar};
 
+    if(typeof(username) !== 'string' || typeof(avatar) !== 'string' || !avatar || !username){
+        return res.status(400).send("Todos os campos são obrigatórios!")
+    }
+
     usuarios.push(novoUsuario);
-    res.send("OK");
+    res.status(201).send("OK");
 })
 
 app.post("/tweets", (req, res) =>{
-    const {username, tweet} = req.body;
+    const {tweet} = req.body;
+    const {user} = req.headers;
 
-    const userExiste = usuarios.find(user => user.username === username);
+    if(typeof(user) !== 'string' || typeof(tweet) !== 'string' || !tweet || !user){
+        return res.status(400).send("Todos os campos são obrigatórios!")
+    }
+
+    const userExiste = usuarios.find(userF => userF.username === user);
 
     if(userExiste){
+        const username = user;
         const novoTweet = {username, tweet};
         tweets.push(novoTweet);
-        return res.send("OK");
+        return res.status(201).send("OK");
     }else{
-        res.send("UNAUTHORIZED");
+        res.status(401).send("UNAUTHORIZED");
     }
 })
 
+app.get("/t", (req, res) =>{
+    res.send(tweets)
+})
+
 app.get("/tweets", (req, res) =>{
-    let ultimosTweets = tweets.slice(-10);
-    ultimosTweets = ultimosTweets.reverse();
+
+    const {page} = req.query;
+    if(page === undefined || Number(page) === 1){
+        let ultimosTweets = tweets.slice(-10);
+        ultimosTweets = ultimosTweets.reverse();
+        const tweetsResposta = [];
+        ultimosTweets.forEach(t => {
+            const avatar = usuarios.find(user => user.username === t.username).avatar;
+            const username = t.username;
+            const tweet = t.tweet;
+            const resposta = {username, avatar, tweet};
+            tweetsResposta.push(resposta);
+        })
+
+        return res.send(tweetsResposta);
+    }else{
+        let ultimosTweets = tweets.slice(-(Number(page) * 10), (Number(page) - 9));
+        ultimosTweets = ultimosTweets.reverse();
+        const tweetsResposta = [];
+        ultimosTweets.forEach(t => {
+            const avatar = usuarios.find(user => user.username === t.username).avatar;
+            const username = t.username;
+            const tweet = t.tweet;
+            const resposta = {username, avatar, tweet};
+            tweetsResposta.push(resposta);
+        })
+
+        res.send(tweetsResposta);
+    }
+})
+
+app.get("/tweets/:USERNAME", (req, res) =>{
+    const {USERNAME} = req.params;
+    const tweetsUser = tweets.filter(t => t.username === USERNAME);
+
     const tweetsResposta = [];
-    ultimosTweets.forEach(t => {
+    tweetsUser.forEach(t => {
         const avatar = usuarios.find(user => user.username === t.username).avatar;
         const username = t.username;
         const tweet = t.tweet;
