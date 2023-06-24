@@ -46,23 +46,11 @@ app.get("/t", (req, res) =>{
 
 app.get("/tweets", (req, res) =>{
 
-    const {page} = req.query;
-    if(page === undefined || Number(page) === 1){
-        let ultimosTweets = tweets.slice(-10);
-        ultimosTweets = ultimosTweets.reverse();
-        const tweetsResposta = [];
-        ultimosTweets.forEach(t => {
-            const avatar = usuarios.find(user => user.username === t.username).avatar;
-            const username = t.username;
-            const tweet = t.tweet;
-            const resposta = {username, avatar, tweet};
-            tweetsResposta.push(resposta);
-        })
-
-        return res.send(tweetsResposta);
-    }else{
-        let ultimosTweets = tweets.slice(-(Number(page) * 10), (Number(page) - 9));
-        ultimosTweets = ultimosTweets.reverse();
+    let {page} = req.query;
+    if(page < 1){return res.status(400).send("Informe uma página válida!")}
+    if(page === undefined){page = 1}
+    let ultimosTweets = [...tweets].reverse();
+        ultimosTweets = ultimosTweets.slice((Number(page) - 1) * 10, Number(page) * 10);
         const tweetsResposta = [];
         ultimosTweets.forEach(t => {
             const avatar = usuarios.find(user => user.username === t.username).avatar;
@@ -73,7 +61,6 @@ app.get("/tweets", (req, res) =>{
         })
 
         res.send(tweetsResposta);
-    }
 })
 
 app.get("/tweets/:USERNAME", (req, res) =>{
